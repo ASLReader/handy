@@ -1,6 +1,10 @@
 #!/usr/bin/python3
 import sys
-from flask import Flask
+from flask import Flask, request, send_file
+import io
+# project imports
+import camera
+
 
 server = Flask("handy")
 
@@ -11,7 +15,10 @@ def debug_endpoint():
 
 @server.route("/handy/camera")
 def camera_endpoint():
-    return "Camera endpoint\n"
+    file = io.BytesIO()
+    camera.picture(file, format="png")
+    file.seek(0, 0)
+    return send_file(file, mimetype="image/png")
 
 @server.route("/handy/fingers")
 def fingers_endpoint():
