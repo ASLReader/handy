@@ -1,10 +1,12 @@
 #!/usr/bin/python3
 import sys
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, jsonify
 import io
+import requests
 # project imports
 import camera
 
+hand_matrix_endpoint = "http://192.168.0.31:5000/"
 
 server = Flask("handy")
 
@@ -22,9 +24,13 @@ def camera_endpoint():
 
 @server.route("/handy/fingers")
 def fingers_endpoint():
-    return "Fingers endpoint\n"
+    file = io.BytesIO()
+    camera.picture(file, format="png")
+    file.seek(0, 0)
+    result = requests.post(hand_matrix_endpoint, data=file.read())
+    print(result.text)
+    return jsonify(result.json())
 
 @server.route("/handy/sign")
 def sign_endpoint():
     return "Sign endpoint\n"
-
