@@ -17,7 +17,7 @@ server = Flask("hand_tracking")
 def calculate_wireframe():
     hands = mp_hands.Hands(
         static_image_mode=True,
-        max_num_hands=2,
+        max_num_hands=request.args.get("hands", default=2, type=int),
         min_detection_confidence=0.5)
 
     #print(hands._output_stream_type_info is not None)
