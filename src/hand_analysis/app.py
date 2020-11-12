@@ -62,7 +62,11 @@ def calculate_wireframe():
                         "image": {"x":landmark_px[0], "y": landmark_px[1]}
                     }
             if jsonable_landmarks:
-                landmarks.append(jsonable_landmarks)
+                # make json list instead of janky dict[int -> dict]
+                jsonable_landmarks2 = [{}] * len(jsonable_landmarks)
+                for x in jsonable_landmarks:
+                    jsonable_landmarks2[int(x)] = jsonable_landmarks[x]
+                landmarks.append(jsonable_landmarks2)
             #mp_drawing.draw_landmarks(annotated_image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
     #cv2.imwrite('/tmp/annotated_image' + str(idx) + '.png', cv2.flip(image, 1))
     hands.close()
