@@ -23,7 +23,7 @@ def camera_endpoint():
             break
         except Exception as e:
             file.seek(0, 0)
-            if !requests.args.get("nofail", default=False, type=bool):
+            if not requests.args.get("nofail", default=False, type=bool):
                 return send_file(file, mimetype="image/png"), 500
     file.seek(0, 0)
     return send_file(file, mimetype="image/png")
@@ -46,9 +46,9 @@ def sign_endpoint():
         camera.picture(file, format="png")
         file.seek(0, 0)
         points = fingers.wireframe(file, request)
-        print("ML detection:", points)
+        #print("ML detection:", points["landmarks"])
         result = match.algorithms[algo](points, request)
-        print("Matches:", result)
+        #print("Matches:", result)
         return jsonify(result)
     else:
         return jsonify({"reason": "algorithm not found"}), 404
