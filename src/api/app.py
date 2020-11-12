@@ -5,8 +5,7 @@ import io
 import requests
 # project imports
 import camera
-
-hand_matrix_endpoint = "http://192.168.0.31:5000/"
+import fingers
 
 server = Flask("handy")
 
@@ -27,9 +26,8 @@ def fingers_endpoint():
     file = io.BytesIO()
     camera.picture(file, format="png")
     file.seek(0, 0)
-    result = requests.post(hand_matrix_endpoint, data=file.read())
-    print(result.text)
-    return jsonify(result.json())
+    points = fingers.wireframe(file)
+    return jsonify(points)
 
 @server.route("/handy/sign")
 def sign_endpoint():

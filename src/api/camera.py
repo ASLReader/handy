@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import picamera
 
-def picture(file, **kwargs):
+def picture(filelike, **kwargs):
     with picamera.PiCamera() as cam:
-        cam.capture(file, **kwargs)
+        cam.capture(filelike, **kwargs)
