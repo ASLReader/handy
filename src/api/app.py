@@ -28,24 +28,30 @@ def camera_endpoint():
     file.seek(0, 0)
     return send_file(file, mimetype="image/png")
 
-@server.route("/handy/fingers")
+@server.route("/handy/fingers", methods=["GET", "POST"])
 def fingers_endpoint():
-    file = io.BytesIO()
-    camera.picture(file, format="png")
-    file.seek(0, 0)
-    points = fingers.wireframe(file, request)
+    img = io.BytesIO()
+    if request.method == "GET":
+        camera.picture(img, format="png")
+    elif request.method == "POST":
+        img.write(request.data)
+    img.seek(0, 0)
+    points = fingers.wireframe(img, request)
     if points is None:
         return jsonify({"reason": "hand processing back-end failure"}), 500
     return jsonify(points)
 
-@server.route("/handy/sign")
+@server.route("/handy/sign", methods=["GET", "POST"])
 def sign_endpoint():
     algo = request.args.get("algorithm", default="naive", type=str).lower()
     if algo in match.algorithms:
-        file = io.BytesIO()
-        camera.picture(file, format="png")
-        file.seek(0, 0)
-        points = fingers.wireframe(file, request)
+        img = io.BytesIO()
+        if request.method == "GET":
+            camera.picture(img, format="png")
+        elif request.method == "POST":
+            img.write(request.data)
+        img.seek(0, 0)
+        points = fingers.wireframe(img, request)
         #print("ML detection:", points["landmarks"])
         result = match.algorithms[algo](points, request)
         #print("Matches:", result)

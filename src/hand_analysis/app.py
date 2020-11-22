@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from flask import Flask, request, jsonify
 
 import numpy as np
@@ -26,7 +27,7 @@ def calculate_wireframe():
     #print(request.data)
     #with open("/tmp/image.png", "wb") as f:
     #    f.write(request.data)
-    
+
     nparr = np.fromstring(request.data, dtype=np.uint8)
     image = cv2.flip(cv2.imdecode(nparr, cv2.IMREAD_COLOR), 1)
     #image = cv2.flip(cv2.imread("/tmp/image.png"), 1)
