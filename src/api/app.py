@@ -58,3 +58,9 @@ def sign_endpoint():
         return jsonify(result)
     else:
         return jsonify({"reason": "algorithm not found"}), 404
+
+# do response chores
+@server.after_request
+def add_header(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
