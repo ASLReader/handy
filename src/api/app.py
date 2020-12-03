@@ -50,15 +50,11 @@ def sign_endpoint():
             camera.picture(img, format="png")
         elif request.method == "POST":
             img.write(request.data)
-        img.seek(0, 0)
         points = None
-        for x in range(3):
-            points = fingers.wireframe(img, request)
-            if points is not None:
-                print("Got finger data on try", x)
-                break
+        img.seek(0, 0)
+        points = fingers.wireframe(img, request)
         if points is None:
-            return jsonify({"reason": "No finger data found"}), 500
+            return jsonify({"reason": "No finger data found"}), 400
         #print("ML detection:", points["landmarks"])
         result = match.algorithms[algo](points, request)
         #print("Matches:", result)

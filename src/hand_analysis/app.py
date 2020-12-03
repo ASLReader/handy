@@ -68,8 +68,8 @@ def calculate_wireframe():
                 jsonable_landmarks2 = [{
                         "absolute": {"x": -1, "y": -1},
                         "image": {"x":-1, "y": -1}
-                    }] * 20
-                if len(jsonable_landmarks) < 20:
+                    }] * 21
+                if len(jsonable_landmarks) != 21:
                     print("Missing landmark point detected, hoping everything is OK")
                 for x in jsonable_landmarks:
                     jsonable_landmarks2[int(x)] = jsonable_landmarks[x]
