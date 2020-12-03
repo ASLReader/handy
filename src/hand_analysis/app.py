@@ -64,7 +64,13 @@ def calculate_wireframe():
                     }
             if jsonable_landmarks:
                 # make json list instead of janky dict[int -> dict]
-                jsonable_landmarks2 = [{}] * len(jsonable_landmarks)
+                print("Landmark count: ", len(jsonable_landmarks))
+                jsonable_landmarks2 = [{
+                        "absolute": {"x": -1, "y": -1},
+                        "image": {"x":-1, "y": -1}
+                    }] * 20
+                if len(jsonable_landmarks) < 20:
+                    print("Missing landmark point detected, hoping everything is OK")
                 for x in jsonable_landmarks:
                     jsonable_landmarks2[int(x)] = jsonable_landmarks[x]
                 landmarks.append(jsonable_landmarks2)
