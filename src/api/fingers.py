@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import requests
 
-hand_matrix_endpoint = "http://handy.zettagram.com/"
+hand_matrix_endpoint = "https://handy.zettagram.com/"
 
 def wireframe(filelike, req):
     result = requests.post(hand_matrix_endpoint, params=req.args.to_dict(), data=filelike.read())
