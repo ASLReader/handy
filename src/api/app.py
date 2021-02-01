@@ -14,18 +14,23 @@ passive.start_worker()
 
 @server.route("/handy/debug")
 def debug_endpoint():
+    # misc debug info, this should not be relied on
     return jsonify({
         "name": "handy",
         "python": sys.version,
         "cache_max": passive.max_cache_items,
         "cache_avg": (len(passive.cache_pictures) + len(passive.cache_fingers) + len(passive.cache_matches))/3,
-        "worker_period": passive.debug_worker_period
+        "worker_period": passive.debug_worker_period,
+        "lifetime": passive.lifetime(),
+        "start": passive.debug_lifetime
     })
 
 
 @server.route("/handy/camera")
 def camera_endpoint():
     if request.args.get("live", default=False, type=bool):
+        # take new picture (legacy)
+        nofail = request.args.get("nofail", default=False, type=bool)
         file = io.BytesIO()
         while True:
             try:
@@ -33,11 +38,12 @@ def camera_endpoint():
                 break
             except Exception as e:
                 file.seek(0, 0)
-                if not request.args.get("nofail", default=False, type=bool):
+                if not nofail:
                     return send_file(file, mimetype="image/png"), 500
         file.seek(0, 0)
         return send_file(file, mimetype="image/png")
     else:
+        # use cached picture
         if len(passive.cache_pictures) == 0:
             return jsonify({"reason": "no pictures"}), 418
         file = passive.cache_pictures[-1]
@@ -47,6 +53,7 @@ def camera_endpoint():
 @server.route("/handy/fingers", methods=["GET", "POST"])
 def fingers_endpoint():
     if request.args.get("live", default=False, type=bool):
+        # use live data (legacy)
         img = io.BytesIO()
         if request.method == "GET":
             camera.picture(img, format="png")
@@ -58,24 +65,52 @@ def fingers_endpoint():
             return jsonify({"reason": "hand processing back-end failure"}), 500
         return jsonify(points)
     else:
-        if len(passive.cache_fingers) == 0:
-            return jsonify({"reason": "no hands"}), 418
-        return jsonify(passive.cache_fingers[-1])
+        # cached functionality
+        count = request.args.get("count", default=0, type=int)
+        if count <= 0:
+            if len(passive.cache_fingers) == 0:
+                return jsonify({"reason": "no hands"}), 418
+            return jsonify(passive.cache_fingers[-1])
+        else:
+            # list cached finger data
+            if len(passive.cache_matches) < count:
+                return jsonify({"reason": "not enough hands"}), 418
+            return jsonify(passive.cache_fingers[-count:])
 
 @server.route("/handy/sign", methods=["GET", "POST"])
 def sign_endpoint():
     algo = request.args.get("algorithm", default="naive", type=str).lower()
     use_cache = not request.args.get("live", default=False, type=bool)
     if use_cache and algo == "naive":
-        if len(passive.cache_matches) == 0:
-            return jsonify({"reason": "no hands"}), 418
-        return jsonify(passive.cache_matches[-1])
+        # use pre-cached naive match data
+        count = request.args.get("count", default=0, type=int)
+        if count <= 0:
+            if len(passive.cache_matches) == 0:
+                return jsonify({"reason": "no hands"}), 418
+            return jsonify(passive.cache_matches[-1])
+        else:
+            # list cached match data
+            if len(passive.cache_matches) < count:
+                return jsonify({"reason": "not enough hands"}), 418
+            return jsonify(passive.cache_matches[-count:])
     if algo in match.algorithms:
         if use_cache:
-            if len(passive.cache_fingers) == 0:
-                return jsonify({"reason": "no hands"}), 418
-            return jsonify(passive.cache_fingers[-1])
+            if count <= 0:
+                # use cached finger data since no cached match data for chosen algorithm
+                if len(passive.cache_fingers) == 0:
+                    return jsonify({"reason": "no hands"}), 418
+                item = match.algorithms[algo](passive.cache_fingers[-1], request)
+                return jsonify(item)
+            else:
+                # use cached finger data to generate list of match data
+                if len(passive.cache_matches) < count:
+                    return jsonify({"reason": "not enough hands"}), 418
+                items = list()
+                for f in passive.cache_fingers:
+                    items.append(match.algorithms[algo](f, request))
+                return jsonify(items)
         else:
+            # generate match data live (legacy)
             img = io.BytesIO()
             if request.method == "GET":
                 camera.picture(img, format="png")

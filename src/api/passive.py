@@ -16,6 +16,8 @@ cache_matches = list()
 
 debug_worker_period = -1.0
 
+debug_lifetime = time.time()
+
 def worker():
     global cache_pictures, cache_fingers, cache_matches, debug_worker_period
     start = time.time()
@@ -55,3 +57,6 @@ def worker():
 
 def start_worker():
     thread.Thread(target=worker).start()
+
+def lifetime():
+    return time.time() - debug_lifetime
