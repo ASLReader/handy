@@ -34,7 +34,7 @@ def camera_endpoint():
         file = io.BytesIO()
         while True:
             try:
-                camera.picture(file, format="png")
+                file = camera.picture(file, format="png")
                 break
             except Exception as e:
                 file.seek(0, 0)
@@ -48,7 +48,12 @@ def camera_endpoint():
             return jsonify({"reason": "no pictures"}), 418
         file = passive.cache_pictures[-1]
         file.seek(0,0)
-        return send_file(file, mimetype="image/png")
+        # flask automatically closes files (for some reason, without a way to disable it)
+        # so provide a copy so it doesn't close the cached buffer
+        file2 = io.BytesIO()
+        file2.write(file.read())
+        file2.seek(0,0)
+        return send_file(file2, mimetype="image/png")
 
 @server.route("/handy/fingers", methods=["GET", "POST"])
 def fingers_endpoint():
@@ -56,7 +61,7 @@ def fingers_endpoint():
         # use live data (legacy)
         img = io.BytesIO()
         if request.method == "GET":
-            camera.picture(img, format="png")
+            img = camera.picture(img, format="png")
         elif request.method == "POST":
             img.write(request.data)
         img.seek(0, 0)
@@ -113,7 +118,7 @@ def sign_endpoint():
             # generate match data live (legacy)
             img = io.BytesIO()
             if request.method == "GET":
-                camera.picture(img, format="png")
+                img = camera.picture(img, format="png")
             elif request.method == "POST":
                 img.write(request.data)
             points = None

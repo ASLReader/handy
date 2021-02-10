@@ -25,12 +25,22 @@ def worker():
         # take a picture
         file = io.BytesIO()
         try:
-            camera.picture(file, format="png")
+            file = camera.picture(file, format="png")
             # will fail when camera is being used by something else
         except KeyboardInterrupt:
             return
         except Exception as e:
             continue
+        file.seek(0,0)
+        if camera.bgRemover is None:
+            # create background remover
+            camera.use_bg(file)
+            continue
+        # copy file to cache
+        file2 = io.BytesIO()
+        file.seek(0,0)
+        file2.write(file.read())
+        cache_pictures.append(file2)
         if len(cache_pictures) > max_cache_items:
             del(cache_pictures[0])
         file.seek(0,0)
