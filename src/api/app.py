@@ -86,9 +86,9 @@ def fingers_endpoint():
 def sign_endpoint():
     algo = request.args.get("algorithm", default="naive", type=str).lower()
     use_cache = not request.args.get("live", default=False, type=bool)
+    count = request.args.get("count", default=0, type=int)
     if use_cache and algo == "naive":
         # use pre-cached naive match data
-        count = request.args.get("count", default=0, type=int)
         if count <= 0:
             if len(passive.cache_matches) == 0:
                 return jsonify({"reason": "no hands"}), 418

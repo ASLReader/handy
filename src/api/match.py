@@ -35,13 +35,15 @@ def new_format(sign_data, req):
     matches = list()
     index = 0
     for sign_hand in sign_data["landmarks"]:
-        is_right = sign_data["handedness"][index].lower() == "right"
+        is_right = sign_data["handedness"][index]["label"].lower() == "right"
         #print(sign_hand)
         data_matches = list()
         for sign_key in known_hands_NEW:
+            #print(sign_key)
             known_sign = known_hands_NEW[sign_key] # contains matching data like strategy
             big_dif = match_using_strategy(known_sign, sign_hand, is_right)
-            data_matches.append({"sign":sign_key, "score":1/big_dif})
+            if big_dif is not None:
+                data_matches.append({"sign":sign_key, "score":1/big_dif})
         data_matches.sort(key= lambda x: 1/x["score"]) # sort by match confidence
         matches.append(data_matches)
         index += 1
@@ -71,10 +73,11 @@ def absolute_difference(a, b):
     while len(a) > i and len(b) > i:
         if 0 > a[i]["absolute"]["y"] or 0 > a[i]["absolute"]["x"]:
             misses += 1
+            i += 1
             continue
-        x_dif = ((b[i]["absolute"]["x"] - n_base_x) / b_scale_x)\
+        x_dif = ((b[i]["absolute"]["x"] - b_base_x) / b_scale_x)\
             - ((a[i]["absolute"]["x"] - a_base_x) / a_scale_x)
-        y_dif = ((b[i]["absolute"]["y"] - b_base_y) / sign_hand_scale_y)\
+        y_dif = ((b[i]["absolute"]["y"] - b_base_y) / b_scale_y)\
             - ((a[i]["absolute"]["y"] - a_base_y) / a_scale_y)
         differences.append(math.sqrt(x_dif**2 + y_dif**2))
         i += 1
@@ -87,7 +90,10 @@ def match_using_strategy(known_sign, hand, is_right):
     if known_sign["match"] == "ANY":
         differences = list()
         for known_hand in hands_to_check:
-            differences.append(absolute_difference(known_hand, sign_hand))
+            if len(known_hand) != 0:
+                differences.append(absolute_difference(known_hand, hand))
+        if len(differences) == 0:
+            return None
         return min(differences)
 
 
