@@ -9,3 +9,10 @@ def wireframe(filelike, req):
         #print(result.content)
         return result.json()
     return None
+
+def wireframe_reqless(filelike):
+    result = requests.post(hand_matrix_endpoint, data=filelike.read())
+    if result.status_code == 200:
+        #print(result.content)
+        return result.json()
+    return None

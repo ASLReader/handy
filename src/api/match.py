@@ -10,7 +10,7 @@ with open("hands.json", "r") as j:
     known_hands_NAIVE = json.load(j)
 print("Found", len(known_hands_NAIVE), "hand wireframes (NAIVE)")
 
-def naive(sign_data, req):
+def naive(sign_data, req=None):
     matches = list()
     for sign_hand in sign_data["landmarks"]:
         #print(sign_hand)
