@@ -7,6 +7,7 @@ import camera
 import fingers
 import match
 import passive
+import database
 
 server = Flask("handy")
 
@@ -138,3 +139,6 @@ def sign_endpoint():
 def add_header(response):
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response
+
+# sync firebase db to new algorithm reference struct
+match.known_hands_NEW = database.known_hands_FIREBASE

@@ -26,10 +26,10 @@ def naive(sign_data, req=None):
 # slightly better implementation with support L/R discrimination (still no rotation)
 known_hands_NEW = {}
 
-print("Loading hands for NAIVE matching algorithm")
+print("Loading hands for BOOGALOO matching algorithm")
 with open("hands2.json", "r") as j:
     known_hands_NEW = json.load(j)
-print("Found", len(known_hands_NEW), "hand wireframes (NEW)")
+print("Found", len(known_hands_NEW), "hand wireframes (BOO)")
 
 def new_format(sign_data, req):
     matches = list()
