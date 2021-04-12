@@ -84,14 +84,17 @@ def absolute_difference(a, b):
     return sum(differences) / (i + 1 - misses)
 
 def match_using_strategy(known_sign, hand, is_right):
-    hands_to_check = known_sign["landmarks_L"] # left hand best hand (and default hand)
-    if is_right:
+    hands_to_check = []
+    if not is_right and "landmarks_L" in known_sign:
+        hands_to_check = known_sign["landmarks_L"]
+    elif is_right and "landmarks_R" in known_sign:
         hands_to_check = known_sign["landmarks_R"]
     if known_sign["match"] == "ANY":
         differences = list()
         for known_hand in hands_to_check:
-            if len(known_hand) != 0:
-                differences.append(absolute_difference(known_hand, hand))
+            if known_hand is not None:
+                if len(known_hand) != 0:
+                    differences.append(absolute_difference(known_hand, hand))
         if len(differences) == 0:
             return None
         return min(differences)
